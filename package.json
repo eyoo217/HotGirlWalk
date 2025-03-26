@@ -1,0 +1,44 @@
+{
+  "name": "hotgirlwalkapp",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^6.2.0"
+  },
+  "dependencies": {
+    "-": "^0.0.1",
+    "@coreui/react": "^5.5.0",
+    "@floating-ui/dom": "^1.6.13",
+    "@floating-ui/react": "^0.27.5",
+    "@grpc/grpc-js": "^1.13.1",
+    "@mapbox/mapbox-gl-geocoder": "^5.0.3",
+    "@mapbox/mapbox-sdk": "^0.16.1",
+    "@mapbox/search-js-react": "^1.0.0",
+    "@material-tailwind/react": "^2.1.10",
+    "@mui/icons-material": "^6.4.8",
+    "@mui/material": "^6.4.8",
+    "@react-google-maps/api": "^2.20.6",
+    "@types/leaflet": "^1.9.17",
+    "@vis.gl/react-google-maps": "^1.5.2",
+    "@vitejs/plugin-react": "^4.3.4",
+    "axios": "^1.8.4",
+    "leaflet": "^1.9.4",
+    "mapbox-gl": "^3.10.0",
+    "mui": "^0.0.1",
+    "node": "^20.19.0",
+    "prop-types": "^15.8.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-geolocated": "^4.3.0",
+    "react-google-autocomplete": "^2.7.4",
+    "react-leaflet": "^5.0.0",
+    "react-router-dom": "^7.4.0",
+    "save": "^2.9.0"
+  }
+}

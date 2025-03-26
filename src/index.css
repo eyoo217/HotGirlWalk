@@ -1,0 +1,134 @@
+
+html, body, #root {
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #F5EBE0;
+}
+
+h1, p {
+    font-family: DejaVu Sans Mono, monospace;
+    font-size: 20px;
+}
+
+.home {
+    width: 100%;
+    height: 100%;
+}
+
+.title {
+    text-align: center;
+    font-family: DejaVu Sans Mono, monospace;
+    padding-bottom: 0px;
+    font-size: 8vh;
+    margin-bottom: 0;
+}
+
+.subtitle {
+    text-align: center;
+    padding-top: 0;
+    font-family: DejaVu Sans Mono, monospace;
+    margin-top: 9px;
+    margin-bottom: 50px;
+}
+
+.map-container {
+    height: 100%;
+    width: 50%;
+}
+
+.location-input {
+    width: 60vh;
+    height: 3vh;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 25px;
+    margin-bottom: 25px;
+    background-color: #EDEDE9;
+}
+.destination-input {
+    width: 60vh;
+    height: 3vh;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 25px;
+    margin-bottom: 25px;
+    background-color: #EDEDE9;
+
+}
+
+.find-route-button {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 25px;
+    margin-bottom: 20px;
+    font-family: DejaVu Sans Mono, monospace;
+    background-color: #EDEDE9;
+}
+
+::placeholder {
+    font-family: DejaVu Sans Mono, monospace;
+    font-size: 15px;
+}
+
+.current-location {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 25px;
+    margin-bottom: 25px;
+    font-family: DejaVu Sans Mono, monospace;
+    background-color: #EDEDE9;
+}
+
+.leaflet-container {
+    height: 100vh;
+    width: 100%;
+}
+
+.sidebar-overlay {
+    position: absolute;
+    right:20px;
+    top: 20px;
+    width: 30vw;
+    height: auto;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+    border-radius: 12px;
+    z-index: 1000;
+}
+
+.sidebar-overlay h1, p {
+    font-family: DejaVu Sans Mono, monospace;
+    margin-top: 5px;
+    font-size: 16px;
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+}
+
+@media (max-width: 600px) {
+    .sidebar-overlay {
+        width: 100%;
+        max-width: 100%;
+        left: 0;
+        right: 0;
+        bottom: auto;
+        top: 55px;
+        padding: 10px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        flex-wrap: wrap;
+        border-radius: 0;
+    }
+    .sidebar-overlay h1, p {
+        font-size: x-small;
+        padding-right: 20px;
+        margin: auto;
+
+    }
+}
