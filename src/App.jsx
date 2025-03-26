@@ -17,7 +17,7 @@ function App() {
 
 
   return (
-    <Router>
+    <Router basename="/HotGirlWalk/">
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/results" element={<Results />} />
