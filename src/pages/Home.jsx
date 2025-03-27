@@ -4,7 +4,7 @@ import { useJsApiLoader } from "@react-google-maps/api";
 import useGeolocation from "../hooks/Location";
 import Autocomplete from "react-google-autocomplete";
 
-const googleMapsApiKey = import.meta.env.REACT_GOOGLE_MAPS_API_KEY;
+const googleMapsApiKey = import.meta.env.VITE_REACT_APP_API_KEY;
 const libraries = ["places", "marker"];
 
 function Home() {

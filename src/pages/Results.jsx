@@ -1,15 +1,50 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
+import { GoogleMap, Marker, useJsApiLoader, Polyline } from "@react-google-maps/api";
 import Route from "../services/Route";
 import axios from "axios";
 
 
-const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-console.log(googleMapsApiKey)
+
 const mapID = import.meta.env.VITE_MAP_ID;
 const libraries = ["places", "marker"];
+const googleMapsApiKey = import.meta.env.VITE_REACT_APP_API_KEY;
 
+function decodePolyline(encoded) {
+  let points = [];
+  let index = 0, len = encoded.length;
+  let lat = 0, lng = 0;
+
+  while (index < len) {
+    let shift = 0, result = 0;
+    let byte;
+
+    do {
+      byte = encoded.charCodeAt(index++) - 63;
+      result |= (byte & 0x1F) << shift;
+      shift += 5;
+    } while (byte >= 0x20);
+
+    let deltaLat = (result & 1) ? ~(result >> 1) : (result >> 1);
+    lat += deltaLat;
+
+    shift = 0;
+    result = 0;
+
+    do {
+      byte = encoded.charCodeAt(index++) - 63;
+      result |= (byte & 0x1F) << shift;
+      shift += 5;
+    } while (byte >= 0x20);
+
+    let deltaLng = (result & 1) ? ~(result >> 1) : (result >> 1);
+    lng += deltaLng;
+
+    points.push({ lat: lat / 1e5, lng: lng / 1e5 });
+  }
+
+  return points;
+}
 
 function Results() {
   const location = useLocation();
@@ -32,155 +67,83 @@ function Results() {
   const endMarkerRef = useRef(null);
 
   const mapRef = useRef(null);
-
-  
-
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: googleMapsApiKey,
+    googleMapsApiKey: googleMapsApiKey, // Use the frontend environment variable
     libraries,
-    mapId: [mapID]
+    mapId: mapID
   });
 
-  useEffect(() => {
-    if (!isLoaded || !routes || !mapRef.current) return;
   
-    const bounds = new window.google.maps.LatLngBounds();
-  
-    // Loop through all route paths and extend the bounds
-    Object.values(routes).forEach((route) => {
-      route.forEach((point) => {
-        bounds.extend(new window.google.maps.LatLng(point.lat, point.lng));
-      });
-    });
-  
-    // Fit the map to the route's bounds
-    mapRef.current.fitBounds(bounds, { top: 80, right: 80, left: 50, bottom: 50 });
-  }, [isLoaded, routes]);
 
   useEffect(() => {
-    const geocode = async (address) => {
-      const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${googleMapsApiKey}`);
-      const data = await response.json();
-      return data.results.length > 0 ? data.results[0].geometry.location : null;
-    };
-
-    function decodePolyline(encoded) {
-      let points = [];
-      let index = 0, len = encoded.length;
-      let lat = 0, lng = 0;
-    
-      while (index < len) {
-        let shift = 0, result = 0;
-        let byte;
-        
-        do {
-          byte = encoded.charCodeAt(index++) - 63;
-          result |= (byte & 0x1F) << shift;
-          shift += 5;
-        } while (byte >= 0x20);
-        
-        let deltaLat = (result & 1) ? ~(result >> 1) : (result >> 1);
-        lat += deltaLat;
-    
-        shift = 0;
-        result = 0;
-        
-        do {
-          byte = encoded.charCodeAt(index++) - 63;
-          result |= (byte & 0x1F) << shift;
-          shift += 5;
-        } while (byte >= 0x20);
-    
-        let deltaLng = (result & 1) ? ~(result >> 1) : (result >> 1);
-        lng += deltaLng;
-    
-        points.push({ lat: lat / 1e5, lng: lng / 1e5 });
-      }
-    
-      return points;
-    }
-
-    
-
     const fetchRoutes = async () => {
       if (!start || !end) return;
 
       try {
-        const startLocation = await geocode(start);
-        const endLocation = await geocode(end);
+        const startLocationResponse = await axios.get(`http://localhost:5000/api/geocode?address=${start}`);
+        const endLocationResponse = await axios.get(`http://localhost:5000/api/geocode?address=${end}`);
+
+        const startLocation = startLocationResponse.data;
+        const endLocation = endLocationResponse.data;
+
         setStartCoords(startLocation);
         setEndCoords(endLocation);
 
-        console.log(start, end);
-        console.log(startLocation, endLocation);
-        console.log(startLocation.lng);
 
-        const travelModes = ["WALK", "DRIVE", "TRANSIT"];
-        const routeRequests = travelModes.map(async (mode) => {
-          const requestBody = {
-            origin: { location: { latLng: { latitude: startLocation.lat, longitude: startLocation.lng}} },
-            destination: { location: { latLng: { latitude: endLocation.lat, longitude: endLocation.lng } } },
-            travelMode: mode,
-            computeAlternativeRoutes: false,
-          };
-
-          try {
-            const response = await axios.post(
-              "https://routes.googleapis.com/directions/v2:computeRoutes",
-              requestBody,
-              {
-                headers: {
-                  "Content-Type": "application/json",
-                  "X-Goog-Api-Key": googleMapsApiKey,
-                  "X-Goog-FieldMask": "routes.polyline,routes.distanceMeters,routes.duration",
-                },
-              }
-            );
-            const routeData = response.data.routes[0];
-            if (routeData) {
-              const encodedPolyline = routeData.polyline?.encodedPolyline;
-              if (encodedPolyline) {
-                return { mode, path: decodePolyline(routeData.polyline.encodedPolyline), ...routeData };
-              }
-            }
-            return null;
-          } catch (error) {
-            console.error(`Error fetching ${mode} route:`, error);
-            return null;
-          }
+        const routeResponse = await axios.post('http://localhost:5000/api/get-routes', {
+          start: startLocation,
+          end: endLocation,
         });
-        const results = await Promise.all(routeRequests);
-        const validRoutes = results.filter((route) => route !== null);
+
+
+        if (!routeResponse.data || routeResponse.data.length === 0) {
+          console.error("No routes found");
+          return;
+        }
+        const routeData = routeResponse.data;
+        console.log("TEST", routeData.DRIVE.duration);
+        
+        
         const newRoutes = {};
         const newRouteInfo = {};
-        validRoutes.forEach((route) => {
-          newRoutes[route.mode] = route.path;
-          if (route.mode === "DRIVE") {
+        Object.entries(routeResponse.data).forEach(([mode, route]) => {
+          if (mode === 'DRIVE') {
+            newRoutes["DRIVE"] = decodePolyline(route.polyline.encodedPolyline);
             newRouteInfo.driveDistance = route.distanceMeters;
-            newRouteInfo.driveDuration = parseInt(route.duration.replace(/[^\d]/g, ''));
-          } else if (route.mode === "WALK") {
-            newRouteInfo.walkDistance = route.distanceMeters;
-            newRouteInfo.walkDuration = parseInt(route.duration.replace(/[^\d]/g, ''));
-          } else if (route.mode === "TRANSIT") {
+            newRouteInfo.driveDuration = route.duration;
+          }
+          else if (mode === 'TRANSIT') {
+            newRoutes.TRANSIT = decodePolyline(route.polyline.encodedPolyline);
             newRouteInfo.transitDistance = route.distanceMeters;
-            newRouteInfo.transitDuration = parseInt(route.duration.replace(/[^\d]/g, ''));
+            newRouteInfo.transitDuration = route.duration;
+          }
+          else if (mode === 'WALK') {
+            newRoutes.WALK = decodePolyline(route.polyline.encodedPolyline);
+            newRouteInfo.walkDistance = route.distanceMeters;
+            newRouteInfo.walkDuration = route.duration;
           }
         });
-
+        console.log("setting new routes", newRoutes)
         setRoutes(newRoutes);
         setRouteInfo(newRouteInfo);
+        
       } catch (error) {
-        console.error("Error fetching multiple routes:", error);
+        console.error("Error fetching routes:", error.response?.data || error.message);
       }
     };
     fetchRoutes();
   }, [start, end]);
   
   useEffect(() => {
-    if (!isLoaded || !startCoords || !endCoords || !mapRef.current || !window.google?.maps?.marker) return;
+    if (!isLoaded || !startCoords || !endCoords || !mapRef.current) return;
     const { AdvancedMarkerElement } = window.google.maps.marker;
+    const bounds = new window.google.maps.LatLngBounds();
 
-    
+    bounds.extend(startCoords);
+    bounds.extend(endCoords);
+
+    mapRef.current.fitBounds(bounds);
+   
     // Create the start marker
     if (!startMarkerRef.current) {
       startMarkerRef.current = new AdvancedMarkerElement({
@@ -219,18 +182,15 @@ function Results() {
     const driveScore = routeInfo.driveDistance && routeInfo.driveDuration 
     ? (weightDistance * routeInfo.driveDistance) + (weightTime * (routeInfo.driveDuration + 300)) + ((routeInfo.driveDistance / 1609) * 1.5)
     : 0;
-    console.log("Drive Score: ", driveScore);
-    console.log("drive duration", routeInfo.driveDuration, "drive distance", routeInfo.driveDistance)
+  
 
     const walkScore = routeInfo.walkDistance && routeInfo.walkDuration 
     ? (weightDistance * routeInfo.walkDistance) + (weightTime * routeInfo.walkDuration)
     : 0;
-    console.log("walk duration", routeInfo.walkDuration, "walk distance", routeInfo.walkDistance)
-    console.log("walk score: ", walkScore);
+   
     const transitScore = routeInfo.transitDistance && routeInfo.transitDuration
     ? ((weightDistance * routeInfo.transitDistance) + (weightTime * routeInfo.transitDuration))
     : 0;
-    console.log("transit score: ", transitScore)
     
     const scores = { 'DRIVE': driveScore, 'WALK': walkScore, 'TRANSIT': transitScore};
 
@@ -243,7 +203,7 @@ function Results() {
     setBestRoute(best);
 
   }, [routeInfo]);
- 
+
   
 
   const getRouteText = () => {
@@ -266,11 +226,23 @@ function Results() {
           <GoogleMap
             mapContainerStyle={{ width: '100%', height: '100%' }}
             center={startCoords || { lat: 0, lng: 0 }}
-            zoom={20}
-            options={{ mapId: 'c0ef02cf970fc687'}}
+            zoom={15}
+            options={{ mapId: mapID}}
             onLoad={(map) => (mapRef.current = map)}
           >
-            <Route routes={routes} />
+          <>
+            {Object.entries(routes).map(([mode, path]) => (
+              <Polyline
+                key={mode}
+                path={path}
+                options={{
+                  strokeColor: mode === "WALK" ? "red" : mode === "DRIVE" ? "blue" : "purple",
+                  strokeWeight: 4,
+                  strokeOpacity: 0.7,
+                }}
+              />
+            ))}
+          </>
           </GoogleMap>
         )}
       </div>
@@ -290,8 +262,3 @@ function Results() {
 
 export default Results;
 
-// 16.98 from 900 w belden to soundbar 2.8mi 14min
-// estimated 11.95
-
-// 35.91 from 900 w belden to 8517 skokive blvd 13.5mi 37min
-// estimated 25.04

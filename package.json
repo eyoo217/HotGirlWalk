@@ -9,7 +9,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist",
+    "start": "node server.js"
   },
   "devDependencies": {
     "gh-pages": "^6.3.0",
@@ -32,6 +33,9 @@
     "@vis.gl/react-google-maps": "^1.5.2",
     "@vitejs/plugin-react": "^4.3.4",
     "axios": "^1.8.4",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
     "leaflet": "^1.9.4",
     "mapbox-gl": "^3.10.0",
     "mui": "^0.0.1",
