@@ -80,8 +80,8 @@ function Results() {
       if (!start || !end) return;
 
       try {
-        const startLocationResponse = await axios.get(`http://localhost:5000/api/geocode?address=${start}`);
-        const endLocationResponse = await axios.get(`http://localhost:5000/api/geocode?address=${end}`);
+        const startLocationResponse = await axios.get(`https://hotgirlwalk.onrender.com/api/geocode?address=${start}`);
+        const endLocationResponse = await axios.get(`https://hotgirlwalk.onrender.com/api/geocode?address=${end}`);
 
         const startLocation = startLocationResponse.data;
         const endLocation = endLocationResponse.data;
@@ -90,7 +90,7 @@ function Results() {
         setEndCoords(endLocation);
 
 
-        const routeResponse = await axios.post('http://localhost:5000/api/get-routes', {
+        const routeResponse = await axios.post('https://hotgirlwalk.onrender.com/api/get-routes', {
           start: startLocation,
           end: endLocation,
         });
@@ -192,7 +192,7 @@ function Results() {
     ? ((weightDistance * routeInfo.transitDistance) + (weightTime * routeInfo.transitDuration))
     : 0;
     
-    const scores = { 'DRIVE': driveScore, 'WALK': walkScore, 'TRANSIT': transitScore};
+    const scores = { 'UBER': driveScore, 'WALK': walkScore, 'TRANSIT': transitScore};
 
     const best = Object.keys(scores).reduce((a, b) => {
       if (scores[a] === scores[b]) {
@@ -207,8 +207,8 @@ function Results() {
   
 
   const getRouteText = () => {
-    if (bestRoute === 'DRIVE') {
-      return "Driving is your best bet. If you're willing to spend the extra buck on an Uber or Lyft, arrival is the most efficient this way."
+    if (bestRoute === 'UBER') {
+      return "Ubering is your best bet. Spending the extra buck allows you to spend the least amount of money but get there on time."
     }
     if (bestRoute === 'TRANSIT') {
       return "Taking the train is best way to get to your destination. Transit is the cheapest and easiest way of travel."
@@ -251,7 +251,7 @@ function Results() {
         <h1>Destination: {end}</h1>
         <h1>Best way to travel: {bestRoute}</h1>
         <p>{getRouteText()}</p>
-        <p>Drive: {parseFloat(routeInfo.driveDistance / 1609).toFixed(2)} mi. {parseFloat(routeInfo.driveDuration / 60).toFixed(2)} min.</p>
+        <p>Uber: {parseFloat(routeInfo.driveDistance / 1609).toFixed(2)} mi. {parseFloat(routeInfo.driveDuration / 60).toFixed(2)} min.</p>
         <p>Estimated Uber Price: ~${parseFloat(routeInfo.driveDistance / 1609 * 2.5 + 7.5).toFixed(2)}</p>
         <p>Walk: {parseFloat(routeInfo.walkDistance / 1609).toFixed(2)} mi. {parseFloat(routeInfo.walkDuration / 60).toFixed(2)} min.</p>
         <p>Transit: {parseFloat(routeInfo.transitDistance / 1609).toFixed(2)} mi. {parseFloat(routeInfo.transitDuration / 60).toFixed(2)} min.</p>
