@@ -13,6 +13,9 @@ Upon loading the homepage, enter your address and the place you intend to travel
 
 Made by Elliott Yoo
 
+## NOTE: 
+The website may take a while to load in due to the nature of Render, in which I am using the free tier. Because the server only wakes up when activity occurs, it may take up to a minute for the map to load. I  kind of do not have money to fund this, and mainly made this for fun to experiment and learn more about JavaScript. However if I do find a way to implement a better back-end host that saves me money and doesn't consume all my time I will implement that in the future. 
+
 **Login Page**
 ![Screenshot From 2025-03-27 18-19-27](https://github.com/user-attachments/assets/94b942c7-792a-4196-aad6-44be308411cc)
 
